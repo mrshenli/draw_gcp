@@ -3,6 +3,7 @@ import numpy as np
 
 
 FONT = {'fontname':'Times New Roman', 'size':12}
+FIG_TYPE = "pdf"
 
 """
 GPT 6.7B fp16
@@ -94,23 +95,25 @@ def plot_profiler(show=False):
   if show:
     plt.show()
   else:
-    plt.savefig('image/fsdp_profiler.pdf', bbox_inches='tight')
+    plt.savefig(f'image/fsdp_profiler.{FIG_TYPE}', bbox_inches='tight')
 
 
 plot_profiler()
 
 
 pdp_ck2 = [
-  [2,    4,    6,    8,    10,   12,   14,   16,   18,   20],
-  [5.84, 6.26, 6.15, 6.43, 6.86, 6.36, 6.81, 7.09, 6.99, 7.03],
-  [22.7, 24.5, 26.3, 28.0, 29.7, 31.5, 33.2, 35.0, 36.7, 38.5]
+  [2,    4,    6,    8,    10,   12,   14,   16,   18,   20], # per-GPU batch size
+  [5.84, 6.26, 6.15, 6.43, 6.86, 6.36, 6.81, 7.09, 6.99, 7.03], # delay
+  [22.7, 24.5, 26.3, 28.0, 29.7, 31.5, 33.2, 35.0, 36.7, 38.5], # memory
 ]
+
 
 pdp_ck4 = [
   [2,    4,    6,    8,    10,   12,   14,   16,   18,   20,  22],
   [6.47, 6.35, 6.22, 6.63, 6.29, 7.62, 6.66, 7.07, 7.79, 7.52, 7.49],
   [21.9, 22.8, 23.8, 24.7, 25.6, 26.6, 27.5, 28.4, 29.3, 30.2, 31.2]
 ]
+
 
 
 def plot_delay(ws, show=False):
@@ -121,9 +124,14 @@ def plot_delay(ws, show=False):
     plt.plot(fsdp[0], fsdp[1], '.-', color='red')[0],
     plt.plot(fsdp_checkpoint[0], fsdp_checkpoint[1], 'x-', color='red')[0],
     plt.plot(fsdp_offload[0], fsdp_offload[1], '^-', color='red')[0],
-    # pdp 
+    # pdp ck=2
     plt.plot(pdp_ck2[0], pdp_ck2[1], '.-', color='blue')[0],
-    plt.plot(pdp_ck4[0], pdp_ck4[1], 'x-', color='blue')[0],
+    plt.plot(pdp_ck2_checkpoint[0], pdp_ck2_checkpoint[1], 'x-', color='blue')[0],
+    plt.plot(pdp_ck2_offload[0], pdp_ck2_offload[1], '^-', color='blue')[0],
+    # pdp ck=4
+    plt.plot(pdp_ck4[0], pdp_ck4[1], '.--', color='grey')[0],
+    plt.plot(pdp_ck4_checkpoint[0], pdp_ck4_checkpoint[1], 'x--', color='grey')[0],
+    plt.plot(pdp_ck4_offload[0], pdp_ck4_offload[1], '^--', color='grey')[0],
   ])
 
   plt.legend(
@@ -133,8 +141,12 @@ def plot_delay(ws, show=False):
         "fsdp", 
         "fsdp cp",
         "fsdp ol",
-        "pdp ck2",
-        "pdp ck4"
+        "pdp2",
+        "pdp2 cp",
+        "pdp2 ol",
+        "pdp4",
+        "pdp4 cp",
+        "pdp4 ol",
       ],
       prop={'family':FONT['fontname'], 'size':FONT['size']},
       ncol=2,
@@ -148,10 +160,10 @@ def plot_delay(ws, show=False):
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/fsdp_pdp_delay_ws{ws}.pdf', bbox_inches='tight')
+    plt.savefig(f'image/fsdp_pdp_delay_ws{ws}.{FIG_TYPE}', bbox_inches='tight')
 
 
-plot_delay(16)
+#plot_delay(16)
 
 
 def plot_mem(ws, show=False):
@@ -162,20 +174,29 @@ def plot_mem(ws, show=False):
     plt.plot(fsdp[0], fsdp[2], '.-', color='red')[0],
     plt.plot(fsdp_checkpoint[0], fsdp_checkpoint[2], 'x-', color='red')[0],
     plt.plot(fsdp_offload[0], fsdp_offload[2], '^-', color='red')[0],
-    # pdp 
+    # pdp ck=2
     plt.plot(pdp_ck2[0], pdp_ck2[2], '.-', color='blue')[0],
-    plt.plot(pdp_ck4[0], pdp_ck4[2], 'x-', color='blue')[0],
+    plt.plot(pdp_ck2_checkpoint[0], pdp_ck2_checkpoint[2], 'x-', color='blue')[0],
+    plt.plot(pdp_ck2_offload[0], pdp_ck2_offload[2], '^-', color='blue')[0],
+    # pdp ck=4
+    plt.plot(pdp_ck4[0], pdp_ck4[2], '.--', color='grey')[0],
+    plt.plot(pdp_ck4_checkpoint[0], pdp_ck4_checkpoint[2], 'x--', color='grey')[0],
+    plt.plot(pdp_ck4_offload[0], pdp_ck4_offload[2], '^--', color='grey')[0],
   ])
 
   plt.legend(
       handles=handles,
-      loc="lower right",
+      loc="upper right",
       labels=[
         "fsdp", 
         "fsdp cp",
         "fsdp ol",
-        "pdp ck2",
-        "pdp ck4"
+        "pdp2",
+        "pdp2 cp",
+        "pdp2 ol",
+        "pdp4",
+        "pdp4 cp",
+        "pdp4 ol",
       ],
       prop={'family':FONT['fontname'], 'size':FONT['size']},
       ncol=2,
@@ -189,10 +210,10 @@ def plot_mem(ws, show=False):
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/fsdp_pdp_mem_ws{ws}.pdf', bbox_inches='tight')
+    plt.savefig(f'image/fsdp_pdp_mem_ws{ws}.{FIG_TYPE}', bbox_inches='tight')
 
 
-plot_mem(16)
+#plot_mem(16)
 
 """
 GPT 6.7B fp16
@@ -225,10 +246,35 @@ pdp_ck2 = [
   [22.72, 24.47, 26.22, 27.97, 29.72, 31.47, 33.22, 34.97, 36.72, 38.47]
 ]
 
+pdp_ck2_checkpoint = [
+  [4,     8,     12,    16,    20,    24],
+  [10.57, 12.08, 10.78, 11.09, 12.27, 14.97],
+  [21.76, 22.54, 23.32, 24.10, 24.88, 25.67],
+]
+
+pdp_ck2_offload = [
+  [4,     8,     12,    16,    20,    24],
+  [11.90, 10.82, 12.42, 12.60, 11.99, 13.02],
+  [21.62, 22.27, 22.92, 23.57, 24.21, 24.86],
+]
+
+
 pdp_ck4 = [
   [2,     4,    6,     8,     10,    12,    14,    16,    18,    20,   22],
   [11.70, 9.600, 11.94, 11.06, 10.93, 11.53, 12.68, 12.29, 11.25, 11.82, 10.71],
   [21.91, 22.83, 23.79, 24.70, 25.64, 26.55, 27.49, 28.42, 29.35, 30.27, 31.21],
+]
+
+pdp_ck4_checkpoint = [
+  [4,     8,     12,    16,    20,    24],
+  [10.97, 11.19, 11.18, 12.55, 12.14, 12.54],
+  [21.47, 21.98, 22.48, 22.98, 23.48, 23.98],
+]
+
+pdp_ck4_offload = [
+  [4,     8,     12,    16,    20,    24],
+  [11.30, 12.28, 11.65, 11.95, 12.10, 12.40],
+  [21.41, 21.84, 22.28, 22.71, 23.15, 23.58],
 ]
 
 
