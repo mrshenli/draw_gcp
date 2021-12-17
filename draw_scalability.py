@@ -47,23 +47,23 @@ pdp_ck4 = [
 ]
 
 
-def plot_scaling(prefix, bs, blk_size=256, show=True):
+def plot_scaling(model, bs, blk_size=256, show=True):
 
-  def qps(ws, delay):
+  def qps(ws, bs, delay):
     return np.array(ws) * bs * blk_size / np.array(delay) / 1000
 
   plt.figure(figsize=(6, 3))
   handles = []
   handles.extend([
     # ddp
-    plt.plot(ddp[0], qps(ddp[0], ddp[1]), '.-', color=COLORS[0])[0],
-    plt.plot(ddp[0], qps(ddp[0], ddp[3]), '.--', color=COLORS[0])[0],
+    plt.plot(ddp[0], qps(ddp[0], bs[0], ddp[1]), '.-', color=COLORS[0])[0],
+    plt.plot(ddp[0], qps(ddp[0], bs[1], ddp[3]), '.--', color=COLORS[0])[0],
     # fsdp
-    plt.plot(fsdp[0], qps(fsdp[0], fsdp[1]), '.-', color=COLORS[1])[0],
-    plt.plot(fsdp[0], qps(fsdp[0], fsdp[3]), '.--', color=COLORS[1])[0],
+    plt.plot(fsdp[0], qps(fsdp[0], bs[0], fsdp[1]), '.-', color=COLORS[1])[0],
+    plt.plot(fsdp[0], qps(fsdp[0], bs[1], fsdp[3]), '.--', color=COLORS[1])[0],
     # pdp ck=2
-    plt.plot(pdp_ck2[0], qps(pdp_ck2[0], pdp_ck2[1]), '.-', color=COLORS[2])[0],
-    plt.plot(pdp_ck2[0], qps(pdp_ck2[0], pdp_ck2[3]), '.--', color=COLORS[2])[0],
+    plt.plot(pdp_ck2[0], qps(pdp_ck2[0], bs[0], pdp_ck2[1]), '.-', color=COLORS[2])[0],
+    plt.plot(pdp_ck2[0], qps(pdp_ck2[0], bs[1], pdp_ck2[3]), '.--', color=COLORS[2])[0],
   ])
 
   plt.legend(
@@ -84,15 +84,15 @@ def plot_scaling(prefix, bs, blk_size=256, show=True):
 
 
   plt.xlabel(f"Number of GPUs")
-  plt.ylabel("GPTSmall QPS (1k / Second)")
+  plt.ylabel(f"{model} QPS (1k / Second)")
 
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/{prefix}_scaling_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+    plt.savefig(f'image/{model}_scaling_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
 
 
-def plot_memory(prefix, bs, blk_size=256, show=True):
+def plot_memory(model, bs, blk_size=256, show=True):
 
   def gb(mem):
     return np.array(mem) / 1000
@@ -129,17 +129,17 @@ def plot_memory(prefix, bs, blk_size=256, show=True):
 
 
   plt.xlabel(f"Number of GPUs")
-  plt.ylabel("Peak GPU Memory (GB)")
+  plt.ylabel(f"{model} Peak GPU Memory (GB)")
   plt.ylim([0, 40])
 
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/{prefix}_memory_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+    plt.savefig(f'image/{model}_memory_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
 
 
-plot_scaling("gptsmall", 8, show=False)
-plot_memory("gptsmall", 8, show=False)
+plot_scaling("GPTSmall", [8, 20], show=False)
+plot_memory("GPTSmall", [8, 20], show=False)
 
 
 
@@ -180,8 +180,8 @@ pdp_ck4 = [
 ]
 
 
-plot_scaling("gptlarge", 8, show=False)
-plot_memory("gptlarge", 8, show=False)
+plot_scaling("GPTLarge", [8, 20], show=False)
+plot_memory("GPTLarge", [8, 20], show=False)
 
 
 
@@ -221,8 +221,8 @@ pdp_ck4 = [
 ]
 
 
-plot_scaling("gptxxl", 8, show=False)
-plot_memory("gptxxl", 8, show=False)
+plot_scaling("GPT2.7B", [8, 20], show=False)
+plot_memory("GPT2.7B", [8, 20], show=False)
 
 
 
