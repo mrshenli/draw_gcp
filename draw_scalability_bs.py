@@ -5,8 +5,6 @@ COLORS = [
   "#283350",
   "#f93800",
   "#ffb500",
-  "#000000",
-  "#666666",
 ]
 
 FONT = {'fontname':'Times New Roman', 'size':12}
@@ -61,9 +59,9 @@ def plot_qps(model, blk_size=256, show=True):
     # pdp ck=2
     plt.plot(pdp_ck2[0], qps(pdp_ck2[0], pdp_ck2[1]), '.-', color=COLORS[2])[0],
     # pdp ck=4
-    plt.plot(pdp_ck4[0], qps(pdp_ck4[0], pdp_ck4[1]), '.-', color=COLORS[3])[0],
+    plt.plot(pdp_ck4[0], qps(pdp_ck4[0], pdp_ck4[1]), '^-', color=COLORS[2])[0],
     # pdp ck=8
-    plt.plot(pdp_ck8[0], qps(pdp_ck8[0], pdp_ck8[1]), '.-', color=COLORS[4])[0],
+    plt.plot(pdp_ck8[0], qps(pdp_ck8[0], pdp_ck8[1]), 's-', color=COLORS[2])[0],
   ])
 
   plt.legend(
@@ -74,6 +72,7 @@ def plot_qps(model, blk_size=256, show=True):
         "fsdp",
         "pdp ck2",
         "pdp ck4",
+        "pdp ck8",
       ],
       prop={'family':FONT['fontname'], 'size':FONT['size']},
       ncol=2,
@@ -105,19 +104,20 @@ def plot_mem(model, blk_size=256, show=True):
     # pdp ck=2
     plt.plot(pdp_ck2[0], gb(pdp_ck2[2]), '.-', color=COLORS[2])[0],
     # pdp ck=4
-    plt.plot(pdp_ck4[0], gb(pdp_ck4[2]), '.-', color=COLORS[3])[0],
+    plt.plot(pdp_ck4[0], gb(pdp_ck4[2]), '^-', color=COLORS[2])[0],
     # pdp ck=8
-    plt.plot(pdp_ck8[0], gb(pdp_ck8[2]), '.-', color=COLORS[4])[0],
+    plt.plot(pdp_ck8[0], gb(pdp_ck8[2]), 's-', color=COLORS[2])[0],
   ])
 
   plt.legend(
       handles=handles,
-      loc="upper right",
+      loc="lower right",
       labels=[
         "ddp", 
         "fsdp",
         "pdp ck2",
         "pdp ck4",
+        "pdp ck8",
       ],
       prop={'family':FONT['fontname'], 'size':FONT['size']},
       ncol=2,
