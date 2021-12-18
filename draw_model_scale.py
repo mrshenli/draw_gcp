@@ -7,6 +7,7 @@ COLORS = [
   "#283350",
   "#f93800",
   "#ffb500",
+  "#888888",
 ]
 
 FONT = {'fontname':'Times New Roman', 'size':12}
@@ -46,13 +47,13 @@ fsdp_checkpoint = [
 ]
 
 fsdp_offload = [
-  [125,  350,  760,  1300,  2700,  6700,  13000, 3900,   76000],
+  [125,  350,  760,  1300,  2700,  6700,  13000, 39000,  76000],
   [0.54, 1.26, 2.62, 7.20,  8.63,  20.79, 60.18, 141.54, 322.60],
   [1016, 1104, 1273, 1485,  1763,  2604,  4152,  7692,   15429],
 ]
 
 
-pdp_ck2 = [
+pdp_ck2 = [  # for pdp, it's world size = 16 and batch size = 32
   [125,  350,  760,  1300,  2700,  6700],
   [0.30, 0.77, 1.40, 2.37,  4.48,  10.46],
   [3675, 6120, 8353, 11590, 19134, 34969],
@@ -66,8 +67,8 @@ pdp_ck2_checkpoint = [
 
 pdp_ck2_offload = [
   [125,  350,  760,  1300, 2700,  6700],
-  [0.32, 0.81, 1.52, 2.44, 0.00,  11.21],
-  [3059, 3811, 5191, 7037, 0000,  23565],
+  [0.32, 0.81, 1.52, 2.44, 4.47,  11.21],
+  [3059, 3811, 5191, 7037, 11153, 23565],
 ]
 
 pdp_ck4 = [
@@ -87,6 +88,172 @@ pdp_ck4_offload = [
   [0.40, 0.95, 1.67, 2.56, 4.65,  12.07],
   [2236, 2984, 4360, 6202, 10314, 22714],
 ]
+
+
+
+def plot_qps(model, ws, bs, blk_size=256, show=True):
+
+  def qps(ws, bs, delay):
+    return ws * bs * blk_size / np.array(delay) / 1000
+
+  plt.figure(figsize=(8, 4))
+  handles = []
+  handles.extend([
+    # ddp
+    plt.plot(ddp[0], qps(ws, bs, ddp[1]), '.-', color=COLORS[0])[0],
+    plt.plot(
+        ddp_checkpoint[0], 
+        qps(ws, bs, ddp_checkpoint[1]), 
+        '^--', 
+        color=COLORS[0]
+    )[0],
+    plt.plot(
+        ddp_offload[0], 
+        qps(ws, bs, ddp_offload[1]), 
+        's:', 
+        color=COLORS[0]
+    )[0],
+    # fsdp
+    plt.plot(fsdp[0], qps(ws, bs, fsdp[1]), '.-', color=COLORS[1])[0],
+    plt.plot(
+        fsdp_checkpoint[0], 
+        qps(ws, bs, fsdp_checkpoint[1]), 
+        '^--', 
+        color=COLORS[1]
+    )[0],
+    plt.plot(
+        fsdp_offload[0], 
+        qps(ws, bs, fsdp_offload[1]), 
+        's:', 
+        color=COLORS[1]
+    )[0],
+    # pdp ck=2
+    plt.plot(pdp_ck2[0], qps(ws, bs, pdp_ck2[1]), '.-', color=COLORS[2])[0],
+    plt.plot(
+        pdp_ck2_checkpoint[0], 
+        qps(ws, bs, pdp_ck2_checkpoint[1]), 
+        '^--', 
+        color=COLORS[2]
+    )[0],
+    plt.plot(   
+        pdp_ck2_offload[0], 
+        qps(ws, bs, pdp_ck2_offload[1]), 
+        's:', 
+        color=COLORS[2]
+    )[0],
+    # pdp ck=4
+    plt.plot(pdp_ck4[0], qps(ws, bs, pdp_ck4[1]), '.-', color=COLORS[2])[0],
+    plt.plot(
+        pdp_ck4_checkpoint[0], 
+        qps(ws, bs, pdp_ck4_checkpoint[1]), 
+        '^--', 
+        color=COLORS[2]
+    )[0],
+    plt.plot(   
+        pdp_ck4_offload[0], 
+        qps(ws, bs, pdp_ck4_offload[1]), 
+        's:', 
+        color=COLORS[2]
+    )[0],
+  ])
+
+  plt.legend(
+      handles=handles,
+      loc="upper right",
+      labels=[
+        "ddp", 
+        "ddp ck",
+        "ddp ol", 
+        "fsdp", 
+        "fsdp ck",
+        "fsdp ol", 
+        "pdp2", 
+        "pdp2 ck",
+        "pdp2 ol", 
+        "pdp4", 
+        "pdp4 ck",
+        "pdp4 ol", 
+      ],
+      prop={'family':FONT['fontname'], 'size':FONT['size']},
+      ncol=2,
+      #bbox_to_anchor=(-0.015, 0.3, 0.5, 0.5)
+  )
+
+
+  plt.xlabel(f"Model Size (Million Parameters)")
+  plt.ylabel(f"{model} QPS (1k / Second)")
+  plt.xscale('log')
+  plt.grid(True, which="both")
+
+  if show:
+    plt.show()
+  else:
+    plt.savefig(f'image/{model}_scaling_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+
+
+def plot_mem(model, bs, blk_size=256, show=True):
+
+  def gb(mem):
+    return np.array(mem) / 1000
+
+  plt.figure(figsize=(8, 4))
+  handles = []
+  handles.extend([
+    # ddp
+    plt.plot(ddp[0], gb(ddp[2]), '.-', color=COLORS[0])[0],
+    plt.plot(ddp_checkpoint[0], gb(ddp_checkpoint[2]), '^--', color=COLORS[0])[0],
+    plt.plot(ddp_offload[0], gb(ddp_offload[2]), 's:', color=COLORS[0])[0],
+    # fsdp
+    plt.plot(fsdp[0], gb(fsdp[2]), '.-', color=COLORS[1])[0],
+    plt.plot(fsdp_checkpoint[0], gb(fsdp_checkpoint[2]), '^--', color=COLORS[1])[0],
+    plt.plot(fsdp_offload[0], gb(fsdp_offload[2]), 's:', color=COLORS[1])[0],
+    # pdp ck=2
+    plt.plot(pdp_ck2[0], gb(pdp_ck2[2]), '.-', color=COLORS[2])[0],
+    plt.plot(pdp_ck2_checkpoint[0], gb(pdp_ck2_checkpoint[2]), '^--', color=COLORS[2])[0],
+    plt.plot(pdp_ck2_offload[0], gb(pdp_ck2_offload[2]), 's:', color=COLORS[2])[0],
+    # pdp ck=4
+    plt.plot(pdp_ck4[0], gb(pdp_ck4[2]), '.-', color=COLORS[3])[0],
+    plt.plot(pdp_ck4_checkpoint[0], gb(pdp_ck4_checkpoint[2]), '^--', color=COLORS[3])[0],
+    plt.plot(pdp_ck4_offload[0], gb(pdp_ck4_offload[2]), 's:', color=COLORS[3])[0],
+  ])
+
+  plt.legend(
+      handles=handles,
+      loc="upper left",
+      labels=[
+        "ddp", 
+        "ddp ck",
+        "ddp ol", 
+        "fsdp", 
+        "fsdp ck",
+        "fsdp ol", 
+        "pdp2", 
+        "pdp2 ck",
+        "pdp2 ol", 
+        "pdp4", 
+        "pdp4 ck",
+        "pdp4 ol", 
+      ],
+      prop={'family':FONT['fontname'], 'size':FONT['size']},
+      ncol=2,
+      #bbox_to_anchor=(-0.015, 0.3, 0.5, 0.5)
+  )
+
+
+  plt.xlabel(f"Model Size (Million Parameters)")
+  plt.ylabel(f"{model} Peak GPU Memory (GB)")
+  plt.ylim([0, 40])
+  plt.xscale('log')
+  plt.grid(True, which="both")
+
+  if show:
+    plt.show()
+  else:
+    plt.savefig(f'image/{model}_memory_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+
+
+plot_qps("GPTSmall", 32, 16, show=False)
+plot_mem("GPTSmall", 16, show=False)
 
 
 
