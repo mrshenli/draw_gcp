@@ -91,7 +91,7 @@ pdp_ck4_offload = [
 
 
 
-def plot_qps(model, ws, bs, blk_size=256, show=True):
+def plot_qps(ws, bs, blk_size=256, show=True):
 
   def qps(ws, bs, delay):
     return ws * bs * blk_size / np.array(delay) / 1000
@@ -181,17 +181,17 @@ def plot_qps(model, ws, bs, blk_size=256, show=True):
 
 
   plt.xlabel(f"Model Size (Million Parameters)")
-  plt.ylabel(f"{model} QPS (1k / Second)")
+  plt.ylabel(f"QPS (1k / Second)")
   plt.xscale('log')
   plt.grid(True, which="both")
 
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/{model}_scaling_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+    plt.savefig(f'image/model_qps_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
 
 
-def plot_mem(model, bs, blk_size=256, show=True):
+def plot_mem(bs, blk_size=256, show=True):
 
   def gb(mem):
     return np.array(mem) / 1000
@@ -241,7 +241,7 @@ def plot_mem(model, bs, blk_size=256, show=True):
 
 
   plt.xlabel(f"Model Size (Million Parameters)")
-  plt.ylabel(f"{model} Peak GPU Memory (GB)")
+  plt.ylabel(f"Peak GPU Memory (GB)")
   plt.ylim([0, 40])
   plt.xscale('log')
   plt.grid(True, which="both")
@@ -249,11 +249,11 @@ def plot_mem(model, bs, blk_size=256, show=True):
   if show:
     plt.show()
   else:
-    plt.savefig(f'image/{model}_memory_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
+    plt.savefig(f'image/model_memory_bs{bs}.{FIG_TYPE}', bbox_inches='tight')
 
 
-plot_qps("GPTSmall", 32, 16, show=False)
-plot_mem("GPTSmall", 16, show=False)
+plot_qps(32, 16, show=False)
+plot_mem(16, show=False)
 
 
 
