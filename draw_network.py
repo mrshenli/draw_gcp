@@ -26,8 +26,8 @@ INF = float("inf")
 
 ddp = [
   [125,   350,   760,   1300,  2700,  6700,  13000, 39000,  76000],  # model size
-  [0.26,  0.73,  1.50,  2.18,  4.31,  INF,  INF,   INF,    INF],    # bs=8
-  [2195,  4872,  7581,  11355, 20267, INF,  INF,   INF,    INF],    # mem
+  [0.26,  0.73,  1.50,  2.18,  4.31,  INF,   INF,   INF,    INF],    # bs=8
+  [2195,  4872,  7581,  11355, 20267, INF,   INF,   INF,    INF],    # mem
   ["no",  "no",  "no",  "no",  "no",  "",    "",    "",     ""],     # config
   [0.26,  0.72,  1.35,  2.77,  4.45,  INF,   INF,   INF,    INF],    # bs=16
   [3625,  8014,  11554, 16748, 17435, INF,   INF,   INF,    INF],
@@ -48,24 +48,24 @@ ddp = [
 
 fsdp = [
   [125,   350,   760,   1300,  2700,  6700,  13000, 39000,  76000],  # model size
-  [0.45,  1.19,  2.14,  4.04,  7.01,  16.10, 0.00,  0.00,   0.00],   # bs=8
-  [1676,  3570,  4768,  6510,  10772, 16673, 0000,  0000,   0000],   # mem
-  ["no",  "no",  "no",  "no",  "no",  "no",  "cp",  "ol",   "ol"],     # config
-  [0.46,  1.16,  2.01,  4.25,  7.05,  19.13, 0.00,  0.00,   0.00],   # bs=16
-  [3109,  6711,  8721,  11908, 19546, 28764, 0000,  0000,   0000],
-  ["no",  "no",  "no",  "no",  "no",  "no",  "cp",  "ol",   "ol"], 
-  [0.49,  1.31,  2.18,  4.26,  8.96,  25.49, 0.00,  0.00,   0.00],   # bs=32
-  [5990,  12999, 16735, 22756, 37219, 8535,  0000,  0000,   0000],
-  ["no",  "no",  "no",  "no",  "no",  "cp",  "ol",  "ol",   "ol"], 
-  [0.52,  1.24,  2.26,  5.78,  10.69, 24.97, 0.00,  0.00,   0.00],   # bs=64
-  [11751, 25569  23757, 6244,  8414,  9219,  0000,  0000,   0000],
-  ["no",  "no",  "no",  "cp",  "cp",  "ol",  "ol",  "ol",   "ol"], 
-  [0.61,  INF,   3.49,  6.26,  10.78, 26.05, 0.00,  0.00,   0.00],   # bs=128
-  [23275, INF,   10032, 11432, 10138, 14750, 0000,  0000,   0000],
-  ["no",  "",    "cp",  "cp",  "cp",  "ol",  "ol",  "ol",   "ol"], 
-  [0.97,  INF,   4.07,  9.23,  13.62, 41.06, 0.00,  0.00,   0.00],   # bs=256
-  [14896, INF,   19352, 22068, 29185, 25809, 0000,  0000,   0000],
-  ["cp",  "",    "cp",  "cp",  "cp",  "ol",  "ol",  "ol",   "ol"], 
+  [0.45,  1.19,  2.14,  4.04,  7.01,  16.10, 44.02, 116.36, INF],   # bs=8
+  [1676,  3570,  4768,  6510,  10772, 16673, 33291, 21383,  INF],   # mem
+  ["no",  "no",  "no",  "no",  "no",  "no",  "no",  "cp",   ""],     # config
+  [0.46,  1.16,  2.01,  4.25,  7.05,  19.13, 52.83, 112.48, INF],   # bs=16
+  [3109,  6711,  8721,  11908, 19546, 28764, 12191, 20678,  INF],
+  ["no",  "no",  "no",  "no",  "no",  "no",  "cp",  "ol",   ""], 
+  [0.49,  1.31,  2.18,  4.26,  8.96,  25.49, 56.25, 118.36, INF],   # bs=32
+  [5990,  12999, 16735, 22756, 37219, 8535,  15880, 22777,  INF],
+  ["no",  "no",  "no",  "no",  "no",  "cp",  "cp",  "ol",   ""], 
+  [0.52,  1.24,  2.26,  5.78,  10.69, 24.97, 60.64, 139.11, INF],   # bs=64
+  [11751, 25569, 23757, 6244,  8414,  9219,  15238, 27287,  INF],
+  ["no",  "no",  "no",  "cp",  "cp",  "ol",  "ol",  "ol",   ""], 
+  [0.61,  1.72,  3.49,  6.26,  10.78, 26.05, 72.58, 182.90, INF],   # bs=128
+  [23275, 8823,  10032, 11432, 10138, 14750, 21957, 36308,  INF],
+  ["no",  "cp",  "cp",  "cp",  "cp",  "ol",  "ol",  "ol",   ""], 
+  [0.97,  2.45,  4.07,  9.23,  13.62, 41.06, INF,   INF,    INF],   # bs=256
+  [14896, 17219, 19352, 22068, 29185, 25809, INF,   INF,    INF],
+  ["cp",  "cp",  "cp",  "cp",  "cp",  "ol",  "",    "",     ""], 
 ]
 
 
@@ -93,6 +93,10 @@ pdp = [
 ]
 
 
+# add the following test with wrap=linear and cpu_offload=True
+# srun --label launch_cluster_fsdp.sh GPT76B 8 offload
+
+
 
 def plot_network(nnode, show=True):
   plt.figure(figsize=(6, 3))
@@ -111,7 +115,7 @@ def plot_network(nnode, show=True):
 
       delays = [ddp[row][col], fsdp[row][col], pdp[row][col]]
       index = delays.index(min(delays))
-      color = COLORS[index]
+      color = 'w' if delays[index] == INF else COLORS[index]
       hatch_strs = [ddp[row + 2][col], fsdp[row + 2][col], pdp[row + 2][col]]
       hatch = HATCHS[hatch_strs[index][:2]]
 
@@ -141,8 +145,8 @@ def plot_network(nnode, show=True):
     Patch(facecolor=COLORS[0], label='ddp'),
     Patch(facecolor=COLORS[1], label='fsdp'),
     Patch(facecolor=COLORS[2], label='pdp'),
-    Patch(facecolor='grey', edgecolor='w', hatch="//", label='ck'),
-    Patch(facecolor='grey', edgecolor='w', hatch="\\\\", label='ol'),
+    Patch(facecolor='#cccccc', edgecolor='w', hatch="//", label='ck'),
+    Patch(facecolor='#cccccc', edgecolor='w', hatch="\\\\", label='ol'),
   ]
 
   plt.legend( 
@@ -164,8 +168,32 @@ plot_network(nnode=4, show=False)
 
 
 
+ddp = [
+  [125,   350,   760,   1300,  2700,  6700,  13000, 39000,  76000],  # model size
+  [0.07,  0.12,  0.12,  0.20,  0.29,  INF,   INF,   INF,    INF],    # bs=8
+  [2192,  4872,  7558,  11350, 20243, INF,   INF,   INF,    INF],    # mem
+  ["no",  "no",  "no",  "no",  "no",  "",    "",    "",     ""],     # config
+  [0.08,  0.15,  0.20,  0.38,  0.51,  INF,   INF,   INF,    INF],    # bs=16
+  [3625,  8013,  11514, 16749, 29072, INF,   INF,   INF,    INF],
+  ["no",  "no",  "no",  "no",  "no",  "",    "",    "",     ""],
+  [0.11,  0.23,  0.34,  0.67,  1.19,  INF,   INF,   INF,    INF],    # bs=32
+  [6499,  14301, 19527, 27598, 18490, INF,   INF,   INF,    INF],
+  ["no",  "no",  "no",  "no",  "cp",  "",    "",    "",     ""],
+  [0.17,  0.39,  0.59,  1.71,  2.21,  INF,   INF,   INF,    INF],    # bs=64
+  [12259, 26871, 35556, 12730, 20652, INF,   INF,   INF,    INF],
+  ["no",  "no",  "no",  "no",  "cp",  "",    "",    "",     ""],
+  [0.30,  0.95,  1.51,  3.29,  4.25,  INF,   INF,   INF,    INF],    # bs=128
+  [23783, 13405, 16099, 19509, 27190, INF,   INF,   INF,    INF],
+  ["no",  "cp",  "cp",  "cp",  "cp",  "",    "",    "",     ""],
+  [0.72,  1.83,  2.93,  6.49,  INF,   INF,   INF,   INF,    INF],    # bs=256
+  [21958, 25079, 28695, 33050, INF,   INF,   INF,   INF,    INF],
+  ["cp",  "cp",  "cp",  "cp",  "",    "",    "",    "",     ""], 
+]
 
 
+fsdp = [
+  [125,   350,   760,   1300,  2700,  6700,  13000, 39000,  76000],  # model size
+]
 
 
 
