@@ -149,7 +149,7 @@ def plot_winner(nnode, show=True):
   plt.ylabel(f"Batch Size")
 
   ax.set_xticks(np.array(range(10)) + 0.5)
-  ax.set_xticklabels(['125M','350M','760M','1.3B', '2.7B', '6.7B', '13B', '37B', '76B', '100B'])
+  ax.set_xticklabels(['162M','405M','834M','1.4B', '2.8B', '6.8B','16B','34B','81B', '101B'])
 
 
   ax.set_yticks(np.array(range(6)) + 0.5)
@@ -160,8 +160,8 @@ def plot_winner(nnode, show=True):
     Patch(facecolor=COLORS[0], label='ddp'),
     Patch(facecolor=COLORS[1], label='fsdp'),
     Patch(facecolor=COLORS[2], label='pdp'),
-    Patch(facecolor='#cccccc', edgecolor='w', hatch="//", label='ck'),
-    Patch(facecolor='#cccccc', edgecolor='w', hatch="\\\\", label='ol'),
+    Patch(facecolor='#cccccc', edgecolor='w', hatch="//", label='ac'),
+    Patch(facecolor='#cccccc', edgecolor='w', hatch="\\\\", label='ao'),
     Patch(facecolor='#cccccc', edgecolor='w', hatch="--", label='po'),
   ]
 
@@ -286,20 +286,24 @@ def plot_network(nnode, bs_row, show=True):
   plt.bar(x + width, fsdp_ratio, width, color=COLORS[1], label='fsdp')
 
   plt.xlabel(f"Model Size")
-  plt.ylabel(f"Faster Network Speedup Radio")
+  plt.ylabel(f"Faster Network Speedup Ratio")
   plt.grid(True, which="both")
 
   ax = plt.gca()
   ax.set_xticks(np.array(range(10)))
-  ax.set_xticklabels(['125M','350M','760M','1.3B', '2.7B', '6.7B', '13B', '37B', '76B', '100B'])
+  ax.set_xticklabels(['162M','405M','834M','1.4B', '2.8B', '6.8B','16B','34B','81B', '101B'])
 
 
   plt.legend(    
     ["ddp", "pdp", "fsdp"],
-    loc="upper right",
+    loc="upper left",
     prop={'family':FONT['fontname'], 'size':FONT['size']},
     fancybox=True,
   )
+
+
+  plt.text(7.5, 10.5, f'Enabled PO for\n16B+ models', ha='center', color=COLORS[1], weight='bold')
+  plt.arrow(6.2, 9.5, 0, -2, color=COLORS[1], width=0.03, head_length=1, head_width=0.09)
 
 
   if show:

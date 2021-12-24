@@ -1,3 +1,5 @@
+import matplotlib.lines as mlines
+from matplotlib.patches import Patch, Rectangle
 import matplotlib.pyplot as plt
 import numpy as np
 
@@ -43,6 +45,102 @@ pdp_ck8 = [
   [25765, 26988, 28321, 29709, 31091]
 ]
 
+width=3
+max_qps=450
+
+def plot_twin(model, names, bs, delay, mem, blk_size=256, show=True):
+  def plot_one(model, name, ax1, bs, delay, mem, hide_y_tick, max_bs, blk_size=256):
+
+    ws = 32
+    def qps(bs, delay):
+      return ws * np.array(bs) * blk_size / np.array(delay) / 1000
+
+    def gb(mem):
+      return np.array(mem) / 1000
+
+    ax2 = ax1.twinx()
+    ax1.bar(bs, gb(mem), width=width, color=COLORS[1])
+    ax2.plot(bs, qps(bs, delay), '.-', color=COLORS[0])
+    ax1.tick_params(axis='y', colors=COLORS[1])
+    ax2.tick_params(axis='y', colors=COLORS[0])
+
+
+    ax1.set_ylim([0, 40])
+    ax2.set_ylim([0, max_qps])
+
+    ax1.set_xlim([0, max_bs])
+    ax2.set_xlim([0, max_bs])
+
+    if hide_y_tick[0]:
+      ax1.set_yticklabels([])
+
+    if hide_y_tick[1]:
+      ax2.set_yticklabels([])
+
+    ax1.text(10, 35, name, size="12")
+    ax1.add_patch(
+      Rectangle(
+        [max(bs) + 1, 0], 
+        169 - max(bs), 40, 
+        facecolor="#cccccc", 
+        edgecolor="#cccccc",
+      )
+    )
+
+    if name != "pdp4":
+      ax1.text(max(bs) + 0.5 * (max_bs - max(bs)), 20, "OOM", color="w", size="15", ha="center", weight='bold')
+
+
+
+  max_bs = np.array([max(one_bs) for one_bs in bs])
+  fig = plt.figure(figsize=(12, 3))
+  spec = fig.add_gridspec(
+    ncols=4, nrows=1, 
+    #width_ratios=max_bs / 40.0 + 1,
+    hspace=0, wspace=0,
+  )
+
+  #spec.subplots(sharey=True)
+
+  for i in range(len(bs)):
+    ax = fig.add_subplot(spec[0, i])
+    plot_one(model, names[i], ax, bs[i], delay[i], mem[i], [i > 0, i < 3], max(max_bs)+5, blk_size)
+
+  handles = [
+     Patch(facecolor=COLORS[1], label='Peak GPU Mem'),
+     mlines.Line2D([], [], linestyle='-', marker='.', color=COLORS[0], label='QPS (1k/S)')
+  ]
+
+  fig.legend(
+    handles=handles,
+    labels=["Peak GPU Mem", "QPS (1k/S)"],
+    bbox_to_anchor=(-0.43, 0.9, 1, 0.2),
+    fancybox=True,
+    ncol=2,
+  )
+
+  fig.text(0.5, -0.04, f'Batch Size ({model})', ha='center')
+  fig.text(0.08, 0.5, 'Peak GPU Mem', color=COLORS[1], va='center', rotation='vertical')
+  fig.text(0.945, 0.5, 'QPS (1k/Second)', color=COLORS[0], va='center', rotation='vertical')
+
+  #plt.show()
+  plt.savefig(f'image/{model}_twin_qps_max_bs.{FIG_TYPE}', bbox_inches='tight')
+
+
+plot_twin(
+  "GPTLarge",
+  ["ddp", "fsdp", "pdp2", "pdp4"],
+  [ddp[0], fsdp[0], pdp_ck2[0], pdp_ck4[0]],
+  [ddp[1], fsdp[1], pdp_ck2[1], pdp_ck4[1]],
+  [ddp[2], fsdp[2], pdp_ck2[2], pdp_ck4[2]],
+)
+
+"""
+plot_twin("GPTLarge", ddp[0], ddp[1], ddp[2])
+plot_twin("GPTLarge", fsdp[0], fsdp[1], fsdp[2])
+plot_twin("GPTLarge", pdp_ck2[0], pdp_ck2[1], pdp_ck2[2])
+plot_twin("GPTLarge", pdp_ck4[0], pdp_ck4[1], pdp_ck4[2])
+"""
 
 def plot_qps(model, blk_size=256, show=True):
   ws = 32
@@ -135,8 +233,8 @@ def plot_mem(model, blk_size=256, show=True):
     plt.savefig(f'image/{model}_memory_max_bs.{FIG_TYPE}', bbox_inches='tight')
 
 
-plot_qps("GPTLarge", show=False)
-plot_mem("GPTLarge", show=False)
+#plot_qps("GPTLarge", show=False)
+#plot_mem("GPTLarge", show=False)
 
 
 # GPTXXL, 32 GPUs
@@ -172,8 +270,19 @@ pdp_ck8 = [
 ]
 
 
-plot_qps("GPTXXL", show=False)
-plot_mem("GPTXXL", show=False)
+#plot_qps("GPTXXL", show=False)
+#plot_mem("GPTXXL", show=False)
+
+width=1.7
+max_qps=120
+
+plot_twin(
+  "GPT2.7B",
+  ["ddp", "fsdp", "pdp2", "pdp4"],
+  [ddp[0], fsdp[0], pdp_ck2[0], pdp_ck4[0]],
+  [ddp[1], fsdp[1], pdp_ck2[1], pdp_ck4[1]],
+  [ddp[2], fsdp[2], pdp_ck2[2], pdp_ck4[2]],
+)
 
 
 
